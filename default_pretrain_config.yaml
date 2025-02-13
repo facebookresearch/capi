@@ -1,0 +1,165 @@
+# For train_distributed.py
+launcher:
+  num_nodes: 4  # will use full nodes
+# Orchestration stuff. Should not affect results
+train:
+  output_dir: .
+  auto_resume: true
+  seed: 0
+  nan_check_period: 20
+  log_loss_every: 20
+  profiling: false
+  checkpointing:
+    period: 3750
+    max_to_keep: 3
+# CAPI-specific stuff
+capi:
+  num_clusters: 16384
+  student_temp: 0.12
+  clustering_kwargs:
+    target_temp: 0.06
+    pred_temp: 0.12
+    n_sk_iter: 3
+    bias: true
+  clustering_optimizer:
+    name: AdamW
+    kwargs:
+      betas: [0.9, 0.95]
+    lr_schedule:
+      base_value: 0.0005
+      final_value: 0
+      warmup_iters: 50000
+      truncate_cos: 0.8
+# Optimizers and schedules
+optim:
+  total_iters: 500000
+  # WARN: effective batch_size is batch_size_per_gpu * num_gpus_per_node * num_nodes
+  batch_size_per_gpu: 512
+  optimizer: AdamW
+  optimizer_kwargs:
+    betas: [0.9, 0.95]
+  weight_decay: 0.1
+  lr_schedule:
+    base_value: 0.001
+    final_value: 0  # note: the schedule will not actually reach 0 because of the truncate_cos
+    warmup_iters: 50000
+    truncate_cos: 0.8
+  patch_embed_lr_mult: 0.2
+  rope_lr_mult: 0.0
+  layernorm_wd_mult: 0.1
+  momentum_schedule:
+    start_warmup_value: 1.0
+    base_value: 0.999
+    final_value: 1.0
+    warmup_iters: 50000
+    truncate_cos: 0.8
+# For data.py (duh)
+data:
+  dataset: hf://timm/imagenet-22k-wds?streaming=True&split='train'&img_field='jpg'
+  mask_ratio: 0.65
+  prediction_subsampling: 0.05
+  crop_scale: [0.6,1.0]
+  images_size: 224
+  do_hflip: true
+  masking_generator: InverseBlock
+  masking_generator_kwargs:
+    roll: true
+# Define backbone
+model:
+  transformers_kwargs:  # affects both encoder and decoder
+    embed_dim: 1024
+    drop_path_rate: 0.2
+    block_kwargs:
+      attn_kwargs:
+        num_heads: 16
+  encoder_kwargs:
+    depth: 24
+  decoder_kwargs:
+    depth: 12
+# Stuff in there will make training go brr, but should not affect results (much)
+efficiency:
+  param_dtype: bfloat16  # Use bf16 if your hardware supports it, fp16 if you're adventurous, fp32 if you're patient
+  reduce_dtype: float32  # Keep fp32
+  grad_scaler: false  # only for fp16, useful for stability
+  grad_scaler_growth_interval: 10000
+  dataloader_num_workers: 20  # adjust with your number of cpus
+  cache_dataset: true
+  compilation:
+    do_teacher:
+      dynamic: false
+      disable: false  # set to True if compilation does not work for you
+    do_student:
+      dynamic: false
+      disable: false  # set to True if compilation does not work for you
+  rematerialization:
+    # aka activation checkpointing, gradient checkpointing, activation rematerialization...
+    enabled: true
+    default: true  # only pointwise are rematerialized by default (it's free real memory)
+    policy:
+      aten.randperm.default: true
+      # set these 2 to True to have FSDP behave as "FULL_SHARD"
+      _c10d_functional.all_gather_into_tensor.default: false
+      _c10d_functional.wait_tensor.default: false  
+      # set these 4 to True to trade off memory for speed
+      aten._scaled_dot_product_flash_attention.default: false
+      aten.mm.default: false
+      aten.addmm.default: false
+      aten._scaled_mm.default: false  # only for fp8
+# Automatic evals during training
+evals:
+  fast:
+    period: 10000
+    final: true
+    model_to_eval: student
+    model_setup_script: model.py
+    eval_config:
+      seg_ade20k:
+        file: "eval_segmentation.py"
+        train_dataset_name: "custom://ADE20K?split='training'"
+        test_dataset_name: "custom://ADE20K?split='validation'"
+        ignore_labels: [0,255]  # For most datasets it's 255, but for ADE20K it's 0
+        classifiers_kwargs:
+          knn:
+            dtype: bfloat16
+      viz_ade20k:
+        file: "eval_visualizations.py"
+        dataset_name: "custom://ADE20K?split='training'"
+  slow:
+    period: 20000
+    final: true
+    model_to_eval: student
+    model_setup_script: model.py
+    eval_config:
+      classif_in1k_torchvision:
+        file: "eval_classification.py"
+        train_dataset_name: "torchvision://ImageFolder?root='/datasets01/imagenet_full_size/061417/train'"
+        val_proportion: 0.1
+        test_dataset_names: ["torchvision://ImageFolder?root='/datasets01/imagenet_full_size/061417/val'"]
+        num_classes: 1000
+  full:
+    period: 99999999999  # only do at the end
+    final: true
+    model_to_eval: student_ema
+    model_setup_script: model.py
+    eval_config:
+      classif_in1k_torchvision:
+        file: "eval_classification.py"
+        train_dataset_name: "torchvision://ImageFolder?root='/datasets01/imagenet_full_size/061417/train'"
+        val_proportion: 0.1
+        test_dataset_names: ["torchvision://ImageFolder?root='/datasets01/imagenet_full_size/061417/val'"]
+        num_classes: 1000
+      seg_ade20k:
+        file: "eval_segmentation.py"
+        train_dataset_name: "custom://ADE20K?split='training'"
+        test_dataset_name: "custom://ADE20K?split='validation'"
+        ignore_labels: [0,255]  # For most datasets it's 255, but for ADE20K it's 0
+        classifiers_kwargs:
+          knn:
+            dtype: bfloat16
+      viz_ade20k:
+        file: "eval_visualizations.py"
+        dataset_name: "custom://ADE20K?split='training'"
+      viz_ade20k_448:
+        file: "eval_visualizations.py"
+        dataset_name: "custom://ADE20K?split='training'"
+        resolution: 448

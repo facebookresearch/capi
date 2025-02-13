@@ -1,0 +1,34 @@
+build/
+dist/
+*.egg-info/
+**/__pycache__/
+
+**/.ipynb_checkpoints
+**/.ipynb_checkpoints/**
+
+**/notebooks
+
+# for dumbo to work properly with nfs
+.nfs*
+.dumbo.json
+
+# don't want swap files
+*.swp
+
+# nor compiled binaries
+*.so
+
+# Ignore vscode for vscode lovers
+.vscode/
+.pyre_configuration
+.pyre/pyre.stderr
+
+# testing outputs
+exp_cfg.yaml
+logs/log.txt
+
+# misc
+datasets
+.venv
+.pytype
+.*_cache

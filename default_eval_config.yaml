@@ -1,0 +1,21 @@
+classif_in1k_torchvision:
+  file: "eval_classification.py"
+  train_dataset_name: "torchvision://ImageFolder?root='/datasets01/imagenet_full_size/061417/train'"
+  val_proportion: 0.1
+  test_dataset_names: ["torchvision://ImageFolder?root='/datasets01/imagenet_full_size/061417/val'"]
+  num_classes: 1000
+seg_ade20k:
+  file: "eval_segmentation.py"
+  train_dataset_name: "custom://ADE20K?split='training'"
+  test_dataset_name: "custom://ADE20K?split='validation'"
+  ignore_labels: [0,255]  # For most datasets it's 255, but for ADE20K it's 0
+  classifiers_kwargs:
+    knn:
+      dtype: bfloat16
+viz_ade20k:
+  file: "eval_visualizations.py"
+  dataset_name: "custom://ADE20K?split='training'"
+viz_ade20k_448:
+  file: "eval_visualizations.py"
+  dataset_name: "custom://ADE20K?split='training'"
+  resolution: 448
