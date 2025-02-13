@@ -1,5 +1,5 @@
-# CAPI: Predicting Latent Clusterings
-[[`ArXiv`](#TODO)] [[`BibTeX`](#citing-capi)]
+# CAPI: Cluster and Predict Latents Patches for Improved Masked Image Modeling
+[[`ArXiv`](https://www.youtube.com/watch?v=dQw4w9WgXcQ)] [[`BibTeX`](#citing-capi)]
 
 **[Meta AI Research, FAIR](https://ai.facebook.com/research/)**
 
@@ -9,11 +9,9 @@ Maxime Oquab,
 Julien Mairal,
 Piotr Bojanowski
 
-PyTorch implementation and pretrained models for CAPI. For details, see **Predicting Latent Clusterings**.  
+PyTorch implementation and pretrained models for CAPI. For details, see [**Cluster and Predict Latents Patches for Improved Masked Image Modeling**](https://www.youtube.com/watch?v=dQw4w9WgXcQ). This repository contains the code and models to reproduce the paper.
 
-
-This repository contains the code and models to reproduce [Predicting Latent Clusterings](TODO)
-
+![CAPI diagram](imgs/poule_fig.png)
 
 ## Pretrained models
 | arch     | #params | FLOP/fwd @224 | Pretraining dataset | k-nn ADE20K | attentive IN1k | weights |
@@ -32,8 +30,8 @@ capi_vitl14_lvd = torch.hub.load('facebookresearch/capi:main', 'capi_vitl14_lvd'
 capi_vitl14_in22k = torch.hub.load('facebookresearch/capi:main', 'capi_vitl14_in22k')
 capi_vitl14_in1k = torch.hub.load('facebookresearch/capi:main', 'capi_vitl14_in1k')
 
-# You can then simply call the models to encode an image
-img = torch.zeros(1, 3, 224, 224)  # example img, replace with what you want to encode
+# Simply call the models to encode an image
+img = torch.zeros(1, 3, 224, 224)  # example img, replace with your stuff
 global_repr, registers, feature_map = capi_vitl14_p205(img)
 
 ```
@@ -133,6 +131,25 @@ Some datasets require you to accept terms of use before downloading: eg, for ima
 There is experimental support for VOC, IN22k, iNaturalist21, SUN397 and Places365. However, no guarantee is given on those.
 
 ## Codebase structure
+Flat.
+Main files to read:
+
+- `train_capi.py`: Your main entrypoint, it contains the whole training loop with the bulk of the CAPI logic.
+- `model.py`: A pretty standard vit implementation, as well as the code of the clustering head and model loading.
+- `data.py`: Dataset, augmentations...
+- `train_distributed.py`: Slurm distributed training logic.
+
+Check the other files only when you need a specific info. Here is a map:
+- `eval_visualizations.py`: Generate PCA visualisations of feature maps.
+- `eval_segmentation.py`: [k-NN and logistic regression segmentation evals](https://creativereview.imgix.net/content/uploads/2012/02/ronseal_frame_b_01.jpg).
+- `eval_classification.py`: [Linear and attentive classification evals](https://creativereview.imgix.net/content/uploads/2012/02/ronseal_frame_b_01.jpg).
+- `benchmark.py`: A launcher to send multiple evals of the same model to a Slurm cluster.
+- `utils.py`: 754 LOC. Miscellaneous functions, often their name should be self-explanatory and you should not have to look at their code. When it's not, well. Time to dive in.
+- `fsdp.py`: 547 LOC. Implementation of [SimpleFSDP](https://arxiv.org/abs/2411.00284). Don't think about it.
+- `hubconf.py`: The entrypoint for `torch.hub.load`.
+- `pyproject.toml`: Dependencies, linting config, etc.
+- `README.md`: You are here.
+
 
 ## Efficiency
 The codebase should be pretty efficient. A few features:
@@ -161,5 +178,10 @@ Code built using the DINOv2 codebase. We thank Francisco Massa for the FSDP impl
 If you find this repository useful, please consider giving a star :star: and citation [:t-rex:](wrong_animal):
 
 ```
-TODO
+@article{darcet2025capi,
+  title   = {Cluster and Predict Latents Patches for Improved Masked Image Modeling},
+  author  = {Darcet, Timoth{\'e}e and Baldassarre, Federico and Oquab, Maxime and Mairal, Julien and Bojanowski, Piotr},
+  journal = {arXiv},
+  year    = {2025}
+}
 ```
