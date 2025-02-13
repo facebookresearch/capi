@@ -173,6 +173,14 @@ If you need to optimize for your specific workloads:
 ## Acknowledgements
 Code built using the DINOv2 codebase. We thank Francisco Massa for the FSDP implementation. We also thank the countless and nameless contributors who built thousands of small snippets and tricks that ended up in this codebase.
 
+## License
+
+CAPI code and model weights are released under the Apache License 2.0. See [LICENSE](LICENSE) for additional details.
+
+## Contributing
+
+See [contributing](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md).
+
 ## Citing CAPI
 
 If you find this repository useful, please consider giving a star :star: and citation [:t-rex:](wrong_animal):
