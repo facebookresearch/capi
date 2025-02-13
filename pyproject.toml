@@ -1,0 +1,137 @@
+[project]
+name = "CAPI"
+version = "1.0.0"
+requires-python = "==3.11.9"
+dependencies = [
+  "tqdm==4.67.1",
+  "torch==2.5.1",
+  "torchvision==0.20.1",
+  "omegaconf==2.3.0",
+  "pandas==2.2.2",
+  "scikit-learn==1.5.2",
+  "xformers==0.0.28.post3",
+  "jaxtyping==0.2.33",
+  "pyright>=1.1.389",
+  "einops==0.8.0",
+  "scikit-learn-intelex==20240820.94653",
+  "matplotlib==3.9.2",
+  "pillow==10.4.0",
+  "rich==13.9.3",
+  "nvidia-cuda-runtime-cu12",
+  "cuml-cu12==24.6.1",
+  "tabulate==0.9.0",
+  "torchmetrics==1.5.1",
+  "huggingface_hub==0.26.2",
+  "timm==1.0.11",
+  "datasets==3.2.0",
+  "filelock==3.16.1",
+]
+# It would probably work with different versions
+# but it's untested
+# those are my versions
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu121" }]
+xformers = [{ index = "pytorch-cu121" }]
+torchvision = [{ index = "pytorch-cu121" }]
+cuml-cu12 = [{ index = "nvidia" }]
+nvidia-cuda-runtime-cu12 = [{ index = "nvidia" }]
+
+[tool.pyright]
+include = ["."]
+venvPath = "."
+venv = ".venv"
+exclude = [".venv", ".pytype"]
+typeCheckingMode = "standard"
+pythonVersion = "3.11"
+pythonPlatform = "Linux"
+
+[tool.ruff]
+line-length = 120
+fix = true
+exclude = [".venv", ".pytype"]
+[tool.ruff.lint]
+select = [
+  "F",
+  "E",
+  "W",
+  # "C90",
+  "I",
+  "N",
+  "UP",
+  "YTT",
+  "B",
+  "A",
+  "COM",
+  "C4",
+  # "DTZ",
+  "SIM",
+  "Q",
+  "RUF100",
+  "PTH",
+  # "TD",
+  "FIX",
+  "ERA",
+  "PD",
+  "PGH",
+  "PL",
+  "TRY",
+  "FLY",
+  "NPY",
+  "FAST",
+  "AIR",
+  "PERF",
+  "FURB",
+  # "DOC",
+  "RUF",
+]
+ignore = [
+  "F722",
+  "N803",
+  "N812",
+  "N802",
+  "N807",
+  "N805",
+  "N806",
+  "PLR0913",
+  "PLW2901",
+  "PLR2004",
+  "TRY003",
+  "NPY002",
+  "PLR0915",
+  "PLR0912",
+  "PLW0603",
+  "PGH003",
+  "PD011",
+  "COM812",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = ["E402"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+log_cli = true
+log_cli_level = "INFO"
+beartype_packages = [
+  'model',
+  "train_capi",
+  "utils",
+  "train_distributed",
+  "data",
+  "fsdp",
+  "benchmark",
+  "eval_classification",
+  "eval_segmentation",
+  "eval_visualizations",
+  "baselines",
+]
