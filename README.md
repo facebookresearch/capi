@@ -1,5 +1,5 @@
 # CAPI: Cluster and Predict Latents Patches for Improved Masked Image Modeling
-[[`ArXiv`](https://www.youtube.com/watch?v=dQw4w9WgXcQ)] [[`BibTeX`](#citing-capi)]
+[[`ArXiv`](https://arxiv.org/abs/2502.08769)] [[`BibTeX`](#citing-capi)]
 
 **[Meta AI Research, FAIR](https://ai.facebook.com/research/)**
 
@@ -9,7 +9,7 @@ Maxime Oquab,
 Julien Mairal,
 Piotr Bojanowski
 
-PyTorch implementation and pretrained models for CAPI. For details, see [**Cluster and Predict Latents Patches for Improved Masked Image Modeling**](https://www.youtube.com/watch?v=dQw4w9WgXcQ). This repository contains the code and models to reproduce the paper.
+PyTorch implementation and pretrained models for CAPI. For details, see [**Cluster and Predict Latents Patches for Improved Masked Image Modeling**](https://arxiv.org/abs/2502.08769). This repository contains the code and models to reproduce the paper.
 
 ![CAPI diagram](imgs/poule_fig.png)
 
