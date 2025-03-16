@@ -3,8 +3,8 @@
 
 **[Meta AI Research, FAIR](https://ai.facebook.com/research/)**
 
-Timothée Darcet,
-Federico Baldassare,
+[Timothée Darcet](https://x.com/TimDarcet),
+[Federico Baldassare](https://x.com/BaldassarreFe),
 Maxime Oquab,
 Julien Mairal,
 Piotr Bojanowski
