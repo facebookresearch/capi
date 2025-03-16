@@ -572,8 +572,8 @@ def eval_model(
         gc.collect()
         torch.cuda.empty_cache()
     # Remove all but the last ckpt
-    for ckpt in sorted(ckpt_dir.glob("*.pth"), key=lambda x: x.stat().st_mtime)[:-1]:
-        if torch.distributed.get_rank() == 0:
+    if torch.distributed.get_rank() == 0:
+        for ckpt in sorted(ckpt_dir.glob("*.pth"), key=lambda x: x.stat().st_mtime)[:-1]:
             ckpt.unlink()
             logger.info(f"Deleted checkpoint {ckpt}")
     test_metrics = pd.concat(test_metrics_dfs)
