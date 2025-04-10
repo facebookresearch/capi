@@ -96,7 +96,6 @@ class Classifier:
         labels_train: Int[Tensor, "nt l"],
         features_val: Float[Tensor, "nv d"],
         labels_val: Int[Tensor, "nv l"],
-        ignore_labels: Sequence[int],
         metric_name: str = "mIoU",
     ) -> dict[str, float]:
         hparam_names, grids = zip(*self.hparam_grids.items(), strict=False)
@@ -116,7 +115,7 @@ class Classifier:
                     setattr(self, k, v)
                 self.fit(features_train, labels_train)
                 preds = self.predict(features_val)
-                score = metrics_dict[metric_name](labels_val, preds, ignore_labels)
+                score = metrics_dict[metric_name](labels_val, preds, self.ignore_labels)
                 rank_results[hparam_idx] = score
                 logger.info(
                     "Tested "
@@ -176,6 +175,7 @@ class KNNClassifier(Classifier):
 
     def __init__(
         self,
+        ignore_labels: Sequence[int],
         inference_bs: int = 1024,
         train_set_chunk_size: int | None = 262144,
         train_set_subsampling: int = 1,
@@ -183,7 +183,6 @@ class KNNClassifier(Classifier):
         dtype: str = "float32",
         num_neighbors: Sequence[int] = (1, 3, 10, 30),
         distance: Sequence[str] = ("cosine", "L2"),
-        ignore_labels: Sequence[int] = (255,),
     ):
         super().__init__()
         self.device = torch.device(device)
@@ -289,6 +288,7 @@ class LogregClassifier(Classifier):
 
     def __init__(
         self,
+        ignore_labels: Sequence[int],
         train_set_subsampling: int = 1,
         inference_bs: int = 1024,
         C: Iterable[float] = tuple(10 ** np.linspace(-6, 5, 8)),
@@ -296,7 +296,6 @@ class LogregClassifier(Classifier):
         tol: Iterable[float] = (1e-12,),
         linesearch_max_iter: Iterable[int] = (50,),
         lbfgs_hessian_rank: Iterable[int] = (5,),
-        ignore_labels: Sequence[int] = (255,),
     ):
         super().__init__()
         self.train_set_subsampling = train_set_subsampling
@@ -361,7 +360,7 @@ def eval_model(
     dump_features: bool = False,
     dump_predictions: bool = False,
     dump_classifier: bool = False,
-    ignore_labels: Sequence[int] = (255,),
+    ignore_labels: Sequence[int] = (0, 255),  # For most datasets it's only 255, but for ADE20K it's both 0 and 255
     output_dir: str = ".",
 ) -> dict[str, float]:
     transform = T.Compose(
@@ -433,7 +432,6 @@ def eval_model(
                 labels["train"],
                 features["val"],
                 labels["val"],
-                ignore_labels,
             )
             for k, v in hparam_metrics.items():
                 results_dict[f"hparam_fitting.{classifier_name}.{k}"] = v

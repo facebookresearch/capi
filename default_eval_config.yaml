@@ -8,7 +8,7 @@ seg_ade20k:
   file: "eval_segmentation.py"
   train_dataset_name: "custom://ADE20K?split='training'"
   test_dataset_name: "custom://ADE20K?split='validation'"
-  ignore_labels: [0,255]  # For most datasets it's 255, but for ADE20K it's 0
+  ignore_labels: [0, 255]  # For most datasets it's only 255, but for ADE20K it's both 0 and 255
   classifiers_kwargs:
     knn:
       dtype: bfloat16
