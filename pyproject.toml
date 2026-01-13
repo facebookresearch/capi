@@ -24,7 +24,7 @@ dependencies = [
   "huggingface_hub==0.26.2",
   "timm==1.0.11",
   "datasets==3.2.0",
-  "filelock==3.20.1",
+  "filelock==3.20.3",
 ]
 # It would probably work with different versions
 # but it's untested
