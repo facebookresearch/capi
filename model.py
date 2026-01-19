@@ -550,8 +550,13 @@ class OnlineClustering(nn.Module):
         x_n = nn.functional.normalize(x, dim=-1, p=2, eps=1e-7)
         logits = self.layer(x_n)
         if not self.positionwise_sk:
-            logits = logits.flatten(0, -2)
-        assignments = sinkhorn_knopp(logits.detach() / self.target_temp, n_iterations=self.n_sk_iter)
+            sk_in = logits.flatten(0, -2)
+        else:
+            sk_in = logits
+        assignments = sinkhorn_knopp(sk_in.detach() / self.target_temp, n_iterations=self.n_sk_iter)
+        if not self.positionwise_sk:
+            assignments = assignments.unflatten(0, logits.shape[:-1])
+
         tgt = assignments.flatten(0, -2).float()
         pred = logits.flatten(0, -2).float()
         loss = -torch.sum(tgt * F.log_softmax(pred / self.pred_temp, dim=-1), dim=-1).mean()
